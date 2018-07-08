@@ -14,11 +14,31 @@
 DHT dht(DHTPIN, DHT22);
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+const float HUMIDITY_LOW = 40.0;
+const float HUMIDITY_HIGH = 60.0;
 
 void setup() {
   Serial.begin(9600);
   dht.begin(); 
   u8g2.begin();
+}
+
+void displayData(float humidity, float temperature) {
+  u8g2.setCursor(5, 10);
+  u8g2.print("Humidity:");
+  
+  u8g2.setCursor(64, 10);
+  u8g2.print(humidity);
+  u8g2.setCursor(95, 10);
+  u8g2.print("%");
+  
+  u8g2.setCursor(5, 25);
+  u8g2.print("Temperature:");
+  
+  u8g2.setCursor(80, 25);
+  u8g2.print(temperature);
+  u8g2.setCursor(110, 25);
+  u8g2.print("*C");
 }
 
 void loop() {
@@ -35,21 +55,11 @@ void loop() {
   u8g2.setFont(u8g2_font_t0_12_tf);
   u8g2.firstPage();
   do {
-      u8g2.setCursor(5, 20);
-      u8g2.print("Humidity:");
-      
-      u8g2.setCursor(64, 20);
-      u8g2.print(h);
-      u8g2.setCursor(95, 20);
-      u8g2.print("%");
-
-      u8g2.setCursor(5, 40);
-      u8g2.print("Temperature:");
-      
-      u8g2.setCursor(80, 40);
-      u8g2.print(t);
-      u8g2.setCursor(110, 40);
-      u8g2.print("*C");
-    
+    if (h > HUMIDITY_HIGH || h < HUMIDITY_LOW){
+      u8g2.setPowerSave(0);
+      displayData(h, t);
+    } else {
+      u8g2.setPowerSave(1);
+    }
   } while ( u8g2.nextPage() );
 }
